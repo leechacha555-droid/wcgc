@@ -1,0 +1,6 @@
+{
+  "name": "W 고양이 미용 센터",
+  "description": "프리미엄 고양이 미용 센터를 위한 고품격 반응형 웹사이트 및 실시간 관리자 대시보드",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
