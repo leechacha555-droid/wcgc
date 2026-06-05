@@ -16,13 +16,18 @@ import {
   Sliders,
   Sparkles,
   Phone,
-  Bookmark
+  Bookmark,
+  Lock,
+  Unlock
 } from 'lucide-react';
 import { SiteData, ServiceItem, GalleryItem, BlogPost, FeatureItem } from '../types';
 
 interface AdminDashboardProps {
   data: SiteData;
   appointments: any[];
+  adminPassword?: string;
+  onUpdateAdminPassword: (password: string) => void;
+  onAdminLogout: () => void;
   onUpdateSiteData: (updatedData: SiteData) => void;
   onUpdateAppointmentStatus: (id: string, status: string) => void;
   onDeleteAppointment: (id: string) => void;
@@ -32,12 +37,21 @@ interface AdminDashboardProps {
 export default function AdminDashboard({ 
   data, 
   appointments, 
+  adminPassword = 'wcat1234',
+  onUpdateAdminPassword,
+  onAdminLogout,
   onUpdateSiteData, 
   onUpdateAppointmentStatus, 
   onDeleteAppointment,
   onClose 
 }: AdminDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'content' | 'theme' | 'services' | 'gallery' | 'blog' | 'bookings' | 'seo'>('content');
+  const [activeTab, setActiveTab] = useState<'content' | 'theme' | 'services' | 'gallery' | 'blog' | 'bookings' | 'seo' | 'security'>('content');
+  
+  // Security parameters local copy
+  const [passInput, setPassInput] = useState("");
+  const [passConfirm, setPassConfirm] = useState("");
+  const [passError, setPassError] = useState<string | null>(null);
+  const [passSuccess, setPassSuccess] = useState<string | null>(null);
   
   // Local editable copies of site datasets
   const [logoText, setLogoText] = useState(data.logoText);
@@ -351,12 +365,21 @@ export default function AdminDashboard({
           </div>
         </div>
 
-        <button 
-          onClick={() => { saveAllChanges(); onClose(); }}
-          className="px-4 py-2 bg-stone-800 hover:bg-stone-755 text-stone-100 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer border border-stone-700"
-        >
-          <Check className="w-3.5 h-3.5 text-emerald-400" /> 반영 후 닫기
-        </button>
+        <div className="flex gap-2">
+          <button 
+            type="button"
+            onClick={onAdminLogout}
+            className="px-3 py-2 bg-red-955/45 hover:bg-red-900/40 border border-red-900/50 text-red-400 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer transition-all duration-200"
+          >
+            <Unlock className="w-3.5 h-3.5" /> 안전 로그아웃
+          </button>
+          <button 
+            onClick={() => { saveAllChanges(); onClose(); }}
+            className="px-4 py-2 bg-stone-800 hover:bg-stone-755 text-stone-100 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer border border-stone-700"
+          >
+            <Check className="w-3.5 h-3.5 text-emerald-400" /> 반영 후 닫기
+          </button>
+        </div>
       </div>
 
       {/* HORIZONTAL CATEGORIES */}
@@ -428,6 +451,15 @@ export default function AdminDashboard({
           }`}
         >
           <Globe className="w-3.5 h-3.5" /> 7. 메타 / 검색 SEO
+        </button>
+
+        <button 
+          onClick={() => setActiveTab('security')}
+          className={`px-5 py-3 text-xs font-bold whitespace-nowrap border-b-2 flex items-center gap-1.5 transition-colors cursor-pointer ${
+            activeTab === 'security' ? 'border-amber-500 text-amber-400 bg-stone-900' : 'border-transparent text-stone-400 hover:text-stone-200'
+          }`}
+        >
+          <Lock className="w-3.5 h-3.5 text-amber-400" /> 8. 관리자 계정 보안
         </button>
 
       </div>
@@ -1519,6 +1551,106 @@ export default function AdminDashboard({
               </div>
             </div>
 
+          </div>
+        )}
+
+        {/* TAB 8: ADMIN SECURITY PANEL */}
+        {activeTab === 'security' && (
+          <div className="space-y-6 animate-fade-in" id="security-tab-wrap">
+            <h3 className="font-extrabold text-white text-base border-b border-stone-850 pb-3">관리자(미용디자이너) 계정 보안 관리</h3>
+
+            <div className="bg-stone-850 p-5 rounded-2xl border border-stone-750 space-y-4">
+              <h4 className="text-xs font-bold text-amber-400 uppercase tracking-widest flex items-center gap-1">
+                🔑 관리자 보안 인증 비밀번호 변경
+              </h4>
+              <p className="text-xs text-stone-400 leading-relaxed">
+                현재 보호 세션 진입 시 사용하는 비밀번호를 변경합니다. 유플렉스 또는 외부 기기 접속 시 고객들에게 비밀번호가 노출되지 않도록 주기적인 보안 관리를 권장합니다.
+              </p>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs text-stone-400 mb-1">인증 비밀번호 정보 (현재 비밀번호: <strong className="text-stone-200">{adminPassword}</strong>)</label>
+                  <input 
+                    type="password"
+                    placeholder="새로운 비밀번호 입력"
+                    value={passInput}
+                    onChange={(e) => {
+                      setPassInput(e.target.value);
+                      if (passError) setPassError(null);
+                      if (passSuccess) setPassSuccess(null);
+                    }}
+                    className="w-full bg-stone-900 border border-stone-700 rounded-xl px-4 py-2 text-white text-xs font-semibold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs text-stone-400 mb-1">비밀번호 확인</label>
+                  <input 
+                    type="password"
+                    placeholder="새로운 비밀번호 재입력"
+                    value={passConfirm}
+                    onChange={(e) => {
+                      setPassConfirm(e.target.value);
+                      if (passError) setPassError(null);
+                      if (passSuccess) setPassSuccess(null);
+                    }}
+                    className="w-full bg-stone-900 border border-stone-700 rounded-xl px-4 py-2 text-white text-xs font-semibold"
+                  />
+                </div>
+
+                {passError && (
+                  <p className="text-red-400 text-xs font-bold bg-red-950/20 p-2.5 rounded-xl border border-red-900/40">
+                    ⚠️ {passError}
+                  </p>
+                )}
+
+                {passSuccess && (
+                  <p className="text-emerald-400 text-xs font-bold bg-emerald-950/20 p-2.5 rounded-xl border border-emerald-900/40">
+                    ✨ {passSuccess}
+                  </p>
+                )}
+
+                <button 
+                  type="button"
+                  onClick={() => {
+                    if (!passInput) {
+                      setPassError("비밀번호를 입력해주세요.");
+                      return;
+                    }
+                    if (passInput !== passConfirm) {
+                      setPassError("비밀번호가 일치하지 않습니다. 다시 올바르게 확인해 주세요.");
+                      return;
+                    }
+                    if (passInput.length < 4) {
+                      setPassError("비밀번호는 최소 4글자 이상이어야 합니다.");
+                      return;
+                    }
+                    onUpdateAdminPassword(passInput);
+                    setPassSuccess("비밀번호가 성공적으로 업데이트 되었습니다!");
+                    setPassInput("");
+                    setPassConfirm("");
+                  }}
+                  className="w-full py-2.5 bg-amber-500 text-stone-950 font-bold hover:bg-amber-600 rounded-xl text-xs flex justify-center items-center gap-1 cursor-pointer transition-colors"
+                >
+                  비밀번호 즉시 변경 및 승인
+                </button>
+              </div>
+            </div>
+
+            {/* Admin logout block inside active security view */}
+            <div className="bg-stone-900 p-5 rounded-2xl border border-stone-800 space-y-3">
+              <h4 className="text-xs font-bold text-stone-300">🔓 현재 세션 수동 해제</h4>
+              <p className="text-[11px] text-stone-400 leading-relaxed">
+                공용 타블릿이나 유플렉스 또는 외부의 디바이스에서 작업을 완료한 후에는 세션을 안전하게 로그아웃하십시오. 로그아웃 즉시 일반 고객 모드로 완벽하게 잠금 처리됩니다.
+              </p>
+              <button
+                type="button"
+                onClick={onAdminLogout}
+                className="px-4 py-2 bg-red-900/20 hover:bg-red-900/45 border border-red-900/40 hover:border-red-900/60 rounded-xl text-red-400 text-xs font-bold cursor-pointer transition-colors"
+              >
+                관리자 안전 로그아웃
+              </button>
+            </div>
           </div>
         )}
 
