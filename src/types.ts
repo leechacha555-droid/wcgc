@@ -19,6 +19,7 @@ export interface GalleryItem {
   catName: string;
   serviceReceived: string;
   imageUrl: string;
+  beforeImageUrl?: string;
   breed?: string;
 }
 

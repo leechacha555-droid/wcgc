@@ -392,9 +392,9 @@ export default function App() {
                 </p>
               )}
 
-              <p className="text-[9px] text-stone-500 text-center leading-relaxed">
-                안내: 최초 보안 비밀번호는 <strong className="text-stone-300 font-bold">wcat1234</strong> 입니다.<br />
-                인증 완료 후 대시보드 내 관리자 보안 탭에서 개별 변경이 가능합니다.
+              <p className="text-[10px] text-stone-500 text-center leading-relaxed font-sans">
+                ⚠️ 분실 및 인증 오류가 지속되는 경우 담당 원장님께 문의하십시오.<br />
+                보안을 위해 불필요한 접근 시도는 실시간으로 기록 및 제한될 수 있습니다.
               </p>
 
               {/* Controls */}

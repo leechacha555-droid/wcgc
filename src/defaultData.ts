@@ -70,14 +70,15 @@ export const defaultSiteData: SiteData = {
       isPopular: false
     }
   ],
-  galleryTitle: "미용 스타일 갤러리",
-  gallerySubtitle: "실제 W 고양이 미용 센터를 방문해 행복하고 아름다워진 아이들의 모습입니다.",
+  galleryTitle: "에스테틱 비포 & 애프터 갤러리",
+  gallerySubtitle: "W 고양이 미용 센터의 전문적인 에스테틱 터치로 다시 태어난 아이들의 미용 전후(Before & After) 상세 비교 포트폴리오입니다.",
   gallery: [
     {
       id: "gal-1",
       catName: "레오 (페르시안 친칠라)",
       serviceReceived: "프리미엄 가위컷 & 딥 스파",
       imageUrl: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=600",
+      beforeImageUrl: "https://images.unsplash.com/photo-1533743983669-94fa5c4338ec?q=80&w=600",
       breed: "페르시안"
     },
     {
@@ -85,6 +86,7 @@ export const defaultSiteData: SiteData = {
       catName: "미미 (브리티시 숏헤어)",
       serviceReceived: "베이직 위생 케어 & 아로마 입욕",
       imageUrl: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=600",
+      beforeImageUrl: "https://images.unsplash.com/photo-1574158622643-69d34d72650a?q=80&w=600",
       breed: "브리티시 숏헤어"
     },
     {
@@ -92,6 +94,7 @@ export const defaultSiteData: SiteData = {
       catName: "쿠키 (랙돌)",
       serviceReceived: "시그니처 하이바 가위컷 케어",
       imageUrl: "https://images.unsplash.com/photo-1533738363-b7f9aef128ce?q=80&w=600",
+      beforeImageUrl: "https://images.unsplash.com/photo-1513360309081-36f5e878fc11?q=80&w=600",
       breed: "랙돌"
     },
     {
@@ -99,6 +102,7 @@ export const defaultSiteData: SiteData = {
       catName: "루나 (스코티시 폴드)",
       serviceReceived: "올인원 풀 미용 & 실크 코팅",
       imageUrl: "https://images.unsplash.com/photo-1519052537078-e6302a4968d4?q=80&w=600",
+      beforeImageUrl: "https://images.unsplash.com/photo-1561948955-570b270e7c36?q=80&w=600",
       breed: "스코티시 폴드"
     }
   ],

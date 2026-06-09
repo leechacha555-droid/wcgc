@@ -19,7 +19,7 @@ import {
   HelpCircle,
   Scissors
 } from 'lucide-react';
-import { SiteData, ServiceItem, BlogPost } from '../types';
+import { SiteData, ServiceItem, BlogPost, GalleryItem } from '../types';
 
 interface GroomingWebsiteProps {
   data: SiteData;
@@ -558,40 +558,7 @@ export default function GroomingWebsite({ data, onAddAppointment, onRequestOpenA
           >
             <AnimatePresence mode="popLayout">
               {filteredGallery.map((item) => (
-                <motion.div 
-                  layout
-                  initial={{ opacity: 0, scale: 0.94 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.94 }}
-                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                  key={item.id}
-                  className="group relative overflow-hidden bg-white border border-stone-100 transition-all duration-300 hover:scale-[1.01]"
-                  id={`gallery-item-${item.id}`}
-                >
-                  <div className="aspect-square w-full overflow-hidden bg-[#f9f5f0] relative">
-                    <div className="absolute inset-0 bg-zinc-950/5 group-hover:opacity-0 transition-opacity z-10" />
-                    <img 
-                      src={item.imageUrl} 
-                      alt={item.catName} 
-                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                      referrerPolicy="no-referrer"
-                    />
-                    {item.breed && (
-                      <span 
-                        className="absolute top-3 right-3 text-[9px] bg-white/90 backdrop-blur-xs px-2 py-0.5 text-zinc-700 font-bold border border-stone-100 rounded-sm tracking-wider uppercase shadow-xs z-20"
-                      >
-                        🐾 {item.breed}
-                      </span>
-                    )}
-                  </div>
-                  {/* Overlay details */}
-                  <div className="p-5 flex flex-col justify-end bg-white border-t border-stone-100">
-                    <h4 className="font-serif text-base text-zinc-800 font-bold group-hover:text-point transition-colors" style={{ color: theme.pointColor }}>
-                      {item.catName}
-                    </h4>
-                    <p className="text-[10px] text-zinc-400 mt-1 uppercase tracking-widest font-bold font-sans">{item.serviceReceived}</p>
-                  </div>
-                </motion.div>
+                <GalleryCard key={item.id} item={item} theme={theme} />
               ))}
             </AnimatePresence>
           </motion.div>
@@ -989,5 +956,109 @@ export default function GroomingWebsite({ data, onAddAppointment, onRequestOpenA
       )}
 
     </div>
+  );
+}
+
+// Dedicated Interactive Before/After Gallery Card
+function GalleryCard({ item, theme }: { item: GalleryItem; theme: any; key?: any }) {
+  const [sliderVal, setSliderVal] = useState(50);
+
+  return (
+    <motion.div 
+      layout
+      initial={{ opacity: 0, scale: 0.94 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.94 }}
+      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      key={item.id}
+      className="group relative overflow-hidden bg-white border border-stone-200/80 rounded-2xl hover:shadow-md transition-all duration-300"
+      id={`gallery-item-${item.id}`}
+    >
+      <div className="aspect-square w-full overflow-hidden bg-stone-50 relative select-none">
+        {/* AFTER IMAGE (Underlay) */}
+        <img 
+          src={item.imageUrl} 
+          alt={`${item.catName} After`} 
+          className="absolute inset-0 w-full h-full object-cover"
+          referrerPolicy="no-referrer"
+        />
+
+        {/* BEFORE IMAGE (Clipped Overlay) */}
+        {item.beforeImageUrl && (
+          <img 
+            src={item.beforeImageUrl} 
+            alt={`${item.catName} Before`} 
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ clipPath: `inset(0 ${100 - sliderVal}% 0 0)` }}
+            referrerPolicy="no-referrer"
+          />
+        )}
+
+        {/* Slider split line indicator */}
+        {item.beforeImageUrl && (
+          <>
+            {/* Split line */}
+            <div 
+              className="absolute inset-y-0 pointer-events-none z-20"
+              style={{ left: `${sliderVal}%` }}
+            >
+              <div className="w-0.5 h-full bg-white shadow-md relative" />
+              {/* Slide badge button handle */}
+              <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-white text-zinc-700/90 border border-stone-200 shadow-lg flex items-center justify-center text-xs font-bold leading-none font-mono">
+                ↔
+              </div>
+            </div>
+
+            {/* Invisible native range control overlay for fluid dragging */}
+            <input 
+              type="range" 
+              min="0" 
+              max="100" 
+              value={sliderVal}
+              onChange={(e) => setSliderVal(Number(e.target.value))}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-25"
+            />
+          </>
+        )}
+
+        {/* Category Breed Badge */}
+        {item.breed && (
+          <span 
+            className="absolute top-3 right-3 text-[9px] bg-white/95 backdrop-blur-xs px-2 py-0.5 text-zinc-700 font-bold border border-stone-100 rounded-sm tracking-wider uppercase shadow-xs z-20"
+          >
+            🐾 {item.breed}
+          </span>
+        )}
+
+        {/* Labels overlay */}
+        {item.beforeImageUrl && (
+          <>
+            <span className="absolute bottom-3 left-3 bg-zinc-950/70 text-white font-mono font-bold text-[9px] uppercase tracking-wider px-2 py-0.6 rounded shadow-xs z-20 pointer-events-none">
+              BEFORE
+            </span>
+            <span className="absolute bottom-3 right-3 text-white font-mono font-bold text-[9px] uppercase tracking-wider px-2 py-0.6 rounded shadow-xs z-20 pointer-events-none" style={{ backgroundColor: theme.pointColor }}>
+              AFTER
+            </span>
+          </>
+        )}
+      </div>
+
+      {/* Text Info */}
+      <div className="p-5 flex flex-col justify-end bg-white border-t border-stone-100">
+        <h4 className="font-serif text-base text-zinc-800 font-bold" style={{ color: theme.pointColor }}>
+          {item.catName}
+        </h4>
+        <p className="text-[10px] text-zinc-400 mt-1 uppercase tracking-widest font-bold font-sans">
+          {item.serviceReceived}
+        </p>
+
+        {item.beforeImageUrl && (
+          <div className="mt-2.5 pt-2 border-t border-dotted border-stone-100 flex items-center gap-1.5 text-stone-400">
+            <span className="text-[11px]">🎈</span>
+            <span className="text-[9px] font-medium leading-none">마우스 드래그로 미용 전후를 비교해 보세요!</span>
+          </div>
+        )}
+      </div>
+    </motion.div>
   );
 }

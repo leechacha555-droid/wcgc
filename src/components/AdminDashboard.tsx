@@ -82,9 +82,11 @@ export default function AdminDashboard({
   const [galFormCatName, setGalFormCatName] = useState("");
   const [galFormService, setGalFormService] = useState("");
   const [galFormUrl, setGalFormUrl] = useState("");
+  const [galFormBeforeUrl, setGalFormBeforeUrl] = useState("");
   const [galFormBreed, setGalFormBreed] = useState("");
   const [editingGalId, setEditingGalId] = useState<string | null>(null);
   const [isDragActive, setIsDragActive] = useState(false);
+  const [isBeforeDragActive, setIsBeforeDragActive] = useState(false);
   const [isBlogDragActive, setIsBlogDragActive] = useState(false);
 
   // Blog Local Copy
@@ -245,6 +247,7 @@ export default function AdminDashboard({
         catName: galFormCatName,
         serviceReceived: galFormService || "일반 위생 미용",
         imageUrl: galFormUrl,
+        beforeImageUrl: galFormBeforeUrl ? galFormBeforeUrl.trim() : undefined,
         breed: galFormBreed.trim() || undefined
       } : g);
       setEditingGalId(null);
@@ -254,6 +257,7 @@ export default function AdminDashboard({
         catName: galFormCatName,
         serviceReceived: galFormService || "일반 위생 미용",
         imageUrl: galFormUrl,
+        beforeImageUrl: galFormBeforeUrl ? galFormBeforeUrl.trim() : undefined,
         breed: galFormBreed.trim() || undefined
       };
       nextGallery.push(newItem);
@@ -266,6 +270,7 @@ export default function AdminDashboard({
     setGalFormCatName("");
     setGalFormService("");
     setGalFormUrl("");
+    setGalFormBeforeUrl("");
     setGalFormBreed("");
   };
 
@@ -274,6 +279,7 @@ export default function AdminDashboard({
     setGalFormCatName(item.catName);
     setGalFormService(item.serviceReceived);
     setGalFormUrl(item.imageUrl);
+    setGalFormBeforeUrl(item.beforeImageUrl || "");
     setGalFormBreed(item.breed || "");
   };
 
@@ -968,46 +974,102 @@ export default function AdminDashboard({
                   </div>
                 </div>
 
-                {/* Anytime Image Upload Zone */}
-                <div className="col-span-2">
-                  <label className="block text-xs text-stone-400 mb-1.5 font-bold flex items-center gap-1">
-                    <span>🖼️ 미용 사진 등록 (파일 드래그 앤 드롭 및 클릭 선택 지원, 권장 사항)</span>
-                  </label>
+                {/* Dual Image Upload Panels - Before & After */}
+                <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                   
-                  <div 
-                    onDragEnter={(e) => { e.preventDefault(); setIsDragActive(true); }}
-                    onDragOver={(e) => { e.preventDefault(); setIsDragActive(true); }}
-                    onDragLeave={(e) => { e.preventDefault(); setIsDragActive(false); }}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      setIsDragActive(false);
-                      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                        const file = e.dataTransfer.files[0];
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                          if (typeof reader.result === 'string') {
-                            setGalFormUrl(reader.result);
+                  {/* BEFORE IMAGE PANEL */}
+                  <div className="p-4 bg-stone-900/40 rounded-xl border border-stone-800 space-y-3">
+                    <label className="block text-xs font-bold text-stone-300 flex items-center justify-between">
+                      <span>⏮️ 미용 '전 (Before)' 사진 등록</span>
+                      <span className="text-[9px] text-stone-500 font-normal">선택사항</span>
+                    </label>
+
+                    <div 
+                      onDragEnter={(e) => { e.preventDefault(); setIsBeforeDragActive(true); }}
+                      onDragOver={(e) => { e.preventDefault(); setIsBeforeDragActive(true); }}
+                      onDragLeave={(e) => { e.preventDefault(); setIsBeforeDragActive(false); }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        setIsBeforeDragActive(false);
+                        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                          const file = e.dataTransfer.files[0];
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            if (typeof reader.result === 'string') {
+                              setGalFormBeforeUrl(reader.result);
+                            }
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                      className={`border border-dashed rounded-xl p-4.5 text-center transition-all cursor-pointer ${
+                        isBeforeDragActive 
+                          ? 'border-amber-500 bg-amber-500/10 text-white' 
+                          : galFormBeforeUrl.startsWith('data:') 
+                            ? 'border-emerald-500/40 bg-emerald-500/5 text-stone-200' 
+                            : 'border-stone-750 bg-stone-950 hover:border-stone-605 text-stone-500'
+                      }`}
+                    >
+                      <input 
+                        type="file"
+                        id="gal-before-file-input"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files[0]) {
+                            const file = e.target.files[0];
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              if (typeof reader.result === 'string') {
+                                setGalFormBeforeUrl(reader.result);
+                              }
+                            };
+                            reader.readAsDataURL(file);
                           }
-                        };
-                        reader.readAsDataURL(file);
-                      }
-                    }}
-                    className={`border-2 border-dashed rounded-xl p-6 text-center transition-all cursor-pointer ${
-                      isDragActive 
-                        ? 'border-amber-500 bg-amber-500/10 text-white' 
-                        : galFormUrl.startsWith('data:') 
-                          ? 'border-emerald-500/50 bg-emerald-500/5 text-stone-200' 
-                          : 'border-stone-700 bg-stone-900 hover:border-stone-605 text-stone-400'
-                    }`}
-                  >
+                        }}
+                      />
+                      <label htmlFor="gal-before-file-input" className="cursor-pointer block space-y-1">
+                        <span className="text-xl block">📷</span>
+                        <p className="text-[11px] font-bold text-stone-300">파일 드래그 또는 여기 클릭</p>
+                        <p className="text-[9px] text-stone-600">미용 전 수수하거나 모질 관리가 필요한 상태</p>
+                      </label>
+                    </div>
+
                     <input 
-                      type="file"
-                      id="gal-file-input"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        if (e.target.files && e.target.files[0]) {
-                          const file = e.target.files[0];
+                      type="text"
+                      placeholder="또는 직접 이미지 주소(URL) 링크 입력"
+                      value={galFormBeforeUrl}
+                      onChange={(e) => setGalFormBeforeUrl(e.target.value)}
+                      className="w-full bg-stone-950 border border-stone-800 rounded-lg px-3 py-1.5 text-stone-200 text-[11px] font-mono focus:outline-hidden focus:ring-1 focus:ring-amber-500"
+                    />
+
+                    {galFormBeforeUrl && (
+                      <div className="bg-stone-950/80 p-2 rounded-lg border border-stone-800 flex items-center justify-between gap-3 animate-fade-in text-xs">
+                        <div className="flex items-center gap-2 truncate">
+                          <img src={galFormBeforeUrl} alt="Before preview" className="w-7 h-7 object-cover rounded border border-stone-800" onError={(e)=>{(e.target as HTMLImageElement).src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba";}} />
+                          <span className="text-[9px] text-stone-400 truncate max-w-[150px]">{galFormBeforeUrl}</span>
+                        </div>
+                        <button type="button" onClick={() => setGalFormBeforeUrl("")} className="text-[9px] text-red-400 hover:text-red-300 hover:underline">완전 해제</button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* AFTER IMAGE PANEL */}
+                  <div className="p-4 bg-stone-900/40 rounded-xl border border-stone-800 space-y-3">
+                    <label className="block text-xs font-bold text-stone-300 flex items-center justify-between">
+                      <span>⏭️ 미용 '후 (After)' 사진 등록</span>
+                      <span className="text-[9px] text-red-500 font-bold">필수사항</span>
+                    </label>
+
+                    <div 
+                      onDragEnter={(e) => { e.preventDefault(); setIsDragActive(true); }}
+                      onDragOver={(e) => { e.preventDefault(); setIsDragActive(true); }}
+                      onDragLeave={(e) => { e.preventDefault(); setIsDragActive(false); }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        setIsDragActive(false);
+                        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                          const file = e.dataTransfer.files[0];
                           const reader = new FileReader();
                           reader.onloadend = () => {
                             if (typeof reader.result === 'string') {
@@ -1017,61 +1079,59 @@ export default function AdminDashboard({
                           reader.readAsDataURL(file);
                         }
                       }}
-                    />
-                    <label htmlFor="gal-file-input" className="cursor-pointer block space-y-1">
-                      <div className="flex flex-col items-center justify-center">
-                        <span className="text-3xl mb-1.5">📤</span>
-                        <p className="text-xs font-bold text-stone-200">여기에 이미지 파일을 드래그하여 지우거나 마우스 클릭</p>
-                        <p className="text-[10px] text-stone-500">기기 내부의 어떤 이미지든 제약 없이 즉각 업로드할 수 있습니다.</p>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Text URL Input as fallback */}
-                <div className="col-span-2">
-                  <label className="block text-xs text-stone-400 mb-1 font-bold">또는 직접 이미지 주소(URL) 링크 입력</label>
-                  <input 
-                    type="text"
-                    required
-                    placeholder="https://images.unsplash.com/..."
-                    value={galFormUrl}
-                    onChange={(e) => setGalFormUrl(e.target.value)}
-                    className="w-full bg-stone-900 border border-stone-700 rounded-xl px-3.5 py-2 text-white text-xs font-mono"
-                  />
-                </div>
-
-                {/* Preview area */}
-                {galFormUrl && (
-                  <div className="col-span-2 bg-stone-900/80 p-3 rounded-xl border border-stone-800 flex items-center justify-between gap-4 animate-fade-in">
-                    <div className="flex items-center gap-3">
-                      <div className="w-14 h-14 rounded-lg overflow-hidden bg-stone-950 relative border border-stone-800 shrink-0">
-                        <img 
-                          src={galFormUrl} 
-                          alt="Grooming review preview" 
-                          className="w-full h-full object-cover" 
-                          onError={(e) => {
-                            // If preview fails
-                            (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=300";
-                          }}
-                        />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-stone-200">선택한 미용 모델 사진</p>
-                        <p className="text-[10px] text-stone-500 font-mono max-w-xs sm:max-w-md truncate">
-                          {galFormUrl.substring(0, 100)}...
-                        </p>
-                      </div>
-                    </div>
-                    <button 
-                      type="button"
-                      onClick={() => setGalFormUrl("")}
-                      className="px-2.5 py-1 text-[10px] text-red-400 hover:text-white bg-red-500/10 hover:bg-red-500 border border-red-500/20 hover:border-red-600 rounded-md transition-colors"
+                      className={`border border-dashed rounded-xl p-4.5 text-center transition-all cursor-pointer ${
+                        isDragActive 
+                          ? 'border-amber-500 bg-amber-500/10 text-white' 
+                          : galFormUrl.startsWith('data:') 
+                            ? 'border-emerald-500/40 bg-emerald-500/5 text-stone-200' 
+                            : 'border-stone-750 bg-stone-950 hover:border-stone-605 text-stone-500'
+                      }`}
                     >
-                      초기화
-                    </button>
+                      <input 
+                        type="file"
+                        id="gal-file-input"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files[0]) {
+                            const file = e.target.files[0];
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              if (typeof reader.result === 'string') {
+                                setGalFormUrl(reader.result);
+                              }
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <label htmlFor="gal-file-input" className="cursor-pointer block space-y-1">
+                        <span className="text-xl block">✨</span>
+                        <p className="text-[11px] font-bold text-stone-300">파일 드래그 또는 여기 클릭</p>
+                        <p className="text-[9px] text-stone-600">완성된 케어 후 광택나고 예쁜 피모의 모습</p>
+                      </label>
+                    </div>
+
+                    <input 
+                      type="text"
+                      required
+                      placeholder="또는 직접 이미지 주소(URL) 링크 입력"
+                      value={galFormUrl}
+                      onChange={(e) => setGalFormUrl(e.target.value)}
+                      className="w-full bg-stone-950 border border-stone-800 rounded-lg px-3 py-1.5 text-stone-200 text-[11px] font-mono focus:outline-hidden focus:ring-1 focus:ring-amber-500"
+                    />
+
+                    {galFormUrl && (
+                      <div className="bg-stone-950/80 p-2 rounded-lg border border-stone-800 flex items-center justify-between gap-3 animate-fade-in text-xs">
+                        <div className="flex items-center gap-2 truncate">
+                          <img src={galFormUrl} alt="After preview" className="w-7 h-7 object-cover rounded border border-stone-800" onError={(e)=>{(e.target as HTMLImageElement).src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba";}} />
+                          <span className="text-[9px] text-stone-400 truncate max-w-[150px]">{galFormUrl}</span>
+                        </div>
+                        <button type="button" onClick={() => setGalFormUrl("")} className="text-[9px] text-red-400 hover:text-red-300 hover:underline">완전 해제</button>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
 
               <div className="flex gap-2.5 pt-2">
@@ -1107,15 +1167,44 @@ export default function AdminDashboard({
                 {gallery.map((item) => (
                   <div key={item.id} className="bg-stone-850 p-3 rounded-2xl border border-stone-800 space-y-3 relative group flex flex-col justify-between">
                     <div>
-                      <div className="aspect-video w-full rounded-xl overflow-hidden bg-stone-900 border border-stone-800 relative">
-                        <img 
-                          src={item.imageUrl} 
-                          alt={item.catName} 
-                          className="w-full h-full object-cover" 
-                          referrerPolicy="no-referrer"
-                        />
+                      <div className="aspect-video w-full rounded-xl overflow-hidden bg-stone-900 border border-stone-800 relative flex gap-1 p-1">
+                        {item.beforeImageUrl ? (
+                          <>
+                            <div className="relative flex-1 h-full bg-stone-950 rounded-lg overflow-hidden">
+                              <img 
+                                src={item.beforeImageUrl} 
+                                alt="Before" 
+                                className="w-full h-full object-cover"
+                                referrerPolicy="no-referrer"
+                              />
+                              <span className="absolute bottom-1 left-1 rounded bg-stone-950/75 px-1 py-0.5 text-[7px] font-bold uppercase tracking-wide text-stone-300">
+                                Before
+                              </span>
+                            </div>
+                            <div className="relative flex-1 h-full bg-stone-950 rounded-lg overflow-hidden">
+                              <img 
+                                src={item.imageUrl} 
+                                alt="After" 
+                                className="w-full h-full object-cover"
+                                referrerPolicy="no-referrer"
+                              />
+                              <span className="absolute bottom-1 right-1 rounded bg-stone-950/75 px-1 py-0.5 text-[7px] font-bold uppercase tracking-wide text-amber-400">
+                                After
+                              </span>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="relative w-full h-full">
+                            <img 
+                              src={item.imageUrl} 
+                              alt={item.catName} 
+                              className="w-full h-full object-cover rounded-lg" 
+                              referrerPolicy="no-referrer"
+                            />
+                          </div>
+                        )}
                         {item.breed && (
-                          <span className="absolute top-2.5 right-2.5 text-[9px] bg-stone-950/85 backdrop-blur-md px-2 py-0.6 text-amber-400 rounded-sm font-bold border border-amber-500/25 tracking-wider">
+                          <span className="absolute top-2.5 right-2.5 text-[9px] bg-stone-950/85 backdrop-blur-md px-2 py-0.6 text-amber-400 rounded-sm font-bold border border-amber-500/25 tracking-wider z-10">
                             🐾 {item.breed}
                           </span>
                         )}
